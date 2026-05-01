@@ -1,0 +1,12 @@
+/* WVMS — Main JavaScript */
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').style.display=document.getElementById('sidebar').classList.contains('open')?'block':'none'}
+function toggleNotifications(){document.getElementById('notifDropdown').classList.toggle('show');if(document.getElementById('notifDropdown').classList.contains('show'))loadNotifications()}
+document.addEventListener('click',function(e){var w=document.getElementById('notifWrapper');if(w&&!w.contains(e.target)){var d=document.getElementById('notifDropdown');if(d)d.classList.remove('show')}});
+function loadNotifications(){var list=document.getElementById('notifList');if(!list)return;fetch('/api/notifications.php').then(r=>r.json()).then(data=>{if(!data.length){list.innerHTML='<div class="notif-loading">No notifications</div>';return}list.innerHTML='';data.forEach(n=>{list.innerHTML+=`<div class="notif-item ${n.is_read?'':'unread'}" onclick="markRead(${n.id})"><div class="notif-dot" style="background:${n.is_read?'transparent':'var(--primary)'}"></div><div><div class="notif-text">${n.message}</div><div class="notif-time">${n.time_ago}</div></div></div>`})}).catch(()=>{list.innerHTML='<div class="notif-loading">Failed to load</div>'})}
+function markRead(id){fetch('/api/notifications.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'action=mark_read&id='+id}).then(()=>loadNotifications())}
+function markAllRead(){fetch('/api/notifications.php',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'action=mark_all_read'}).then(()=>{loadNotifications();var c=document.querySelector('.notif-count');if(c)c.remove()})}
+function confirmAction(msg,url){if(confirm(msg))window.location.href=url}
+function filterTable(inputId,tableId){var filter=document.getElementById(inputId).value.toLowerCase();var rows=document.querySelectorAll('#'+tableId+' tbody tr');rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(filter)?'':'none'})}
+function setPreset(val){document.getElementById('quantity_litres').value=val;document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active')}
+// Auto-dismiss flash alerts
+setTimeout(()=>{var a=document.getElementById('flash-alert');if(a)a.style.opacity='0';setTimeout(()=>{if(a)a.remove()},300)},5000);

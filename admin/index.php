@@ -88,9 +88,11 @@ $recentOrders = $recent->fetchAll();
 </div>
 
 <script>
-loadChartData('daily').then(data => {
-    if(data.revenue) createBarChart('revenueChart', data.revenue.labels, data.revenue.data);
-    if(data.orders) createLineChart('ordersChart', data.orders.labels, data.orders.data);
+document.addEventListener("DOMContentLoaded", function() {
+    loadChartData('daily').then(data => {
+        if(data.revenue) createBarChart('revenueChart', data.revenue.labels, data.revenue.data);
+        if(data.orders) createLineChart('ordersChart', data.orders.labels, data.orders.data);
+    });
 });
 </script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

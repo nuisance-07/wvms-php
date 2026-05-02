@@ -86,9 +86,11 @@ $topAreas=$db->query("SELECT delivery_address,COUNT(*) as cnt FROM water_orders 
 </div>
 
 <script>
-loadChartData('<?php echo $period; ?>').then(data => {
-    if(data.revenue) createBarChart('revenueChart', data.revenue.labels, data.revenue.data);
-    if(data.orders) createLineChart('ordersChart', data.orders.labels, data.orders.data);
+document.addEventListener("DOMContentLoaded", function() {
+    loadChartData('<?php echo $period; ?>').then(data => {
+        if(data.revenue) createBarChart('revenueChart', data.revenue.labels, data.revenue.data);
+        if(data.orders) createLineChart('ordersChart', data.orders.labels, data.orders.data);
+    });
 });
 </script>
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

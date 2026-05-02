@@ -81,10 +81,10 @@ Visit `http://localhost:8000`
 
 ## 🔮 Future Scope
 
-- GPS real-time delivery tracking
-- SMS notifications via Africa's Talking API
-- Full M-Pesa Daraja API integration
-- Multi-vendor marketplace mode
+- **GPS Real-Time Delivery Tracking:** Integration with Maps APIs to allow customers and admins to track water delivery vehicles in real-time, improving transparency and reducing support queries.
+- **SMS Notifications via Africa's Talking API:** Proactive SMS alerts for order confirmations, delivery dispatch, and payment receipts, ensuring customers without continuous internet access stay informed.
+- **Full M-Pesa Daraja API Integration:** Automated, seamless payment processing using Safaricom's Daraja API for STK Push and C2B/B2C transactions, replacing manual payment verification.
+- **Multi-Vendor Marketplace Mode:** Expanding the platform to allow independent water vendors to register, manage their own fleets, and compete on the platform, providing customers with more choices based on rating and proximity.
 
 ## 📄 License
 

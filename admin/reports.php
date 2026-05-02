@@ -43,11 +43,15 @@ $deliveredOrd=$db->query("SELECT COUNT(*) FROM water_orders WHERE status='delive
 <div class="grid-2 fade-in mb-8">
     <div class="card" style="margin-bottom:0">
         <h4 class="mb-4 text-primary">Revenue</h4>
-        <canvas id="revenueChart" height="300"></canvas>
+        <div style="position:relative; height:300px; width:100%">
+            <canvas id="revenueChart"></canvas>
+        </div>
     </div>
     <div class="card" style="margin-bottom:0">
         <h4 class="mb-4 text-primary">Orders</h4>
-        <canvas id="ordersChart" height="300"></canvas>
+        <div style="position:relative; height:300px; width:100%">
+            <canvas id="ordersChart"></canvas>
+        </div>
     </div>
 </div>
 

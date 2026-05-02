@@ -51,11 +51,15 @@ $pendingOrders = $db->query("SELECT COUNT(*) FROM water_orders WHERE status='pen
 <div class="grid-2 fade-in mb-8">
     <div class="card" style="margin-bottom:0">
         <h4 class="mb-4 text-primary">Revenue Trend (Last 7 Days)</h4>
-        <canvas id="revenueChart" height="300"></canvas>
+        <div style="position:relative; height:300px; width:100%">
+            <canvas id="revenueChart"></canvas>
+        </div>
     </div>
     <div class="card" style="margin-bottom:0">
         <h4 class="mb-4 text-primary">Orders Trend (Last 7 Days)</h4>
-        <canvas id="ordersChart" height="300"></canvas>
+        <div style="position:relative; height:300px; width:100%">
+            <canvas id="ordersChart"></canvas>
+        </div>
     </div>
 </div>
 

@@ -6,17 +6,49 @@ $db = getDB();
 
 $orderId = (int)($_GET['id'] ?? 0);
 if ($orderId) {
-    $stmt = $db->prepare("SELECT wo.*, v.business_name, d.scheduled_time, d.actual_delivery_time, d.delivery_notes, d.status as delivery_status FROM water_orders wo JOIN vendors v ON wo.vendor_id=v.id LEFT JOIN deliveries d ON d.order_id=wo.id WHERE wo.id=? AND wo.customer_id=?");
+    $stmt = $db->prepare("SELECT wo.*, v.business_name, d.id as delivery_id, d.scheduled_time, d.actual_delivery_time, d.delivery_notes, d.status as delivery_status FROM water_orders wo JOIN vendors v ON wo.vendor_id=v.id LEFT JOIN deliveries d ON d.order_id=wo.id WHERE wo.id=? AND wo.customer_id=?");
     $stmt->execute([$orderId, $_SESSION['user_id']]);
     $order = $stmt->fetch();
 } else {
-    $stmt = $db->prepare("SELECT wo.*, v.business_name, d.scheduled_time, d.actual_delivery_time, d.delivery_notes, d.status as delivery_status FROM water_orders wo JOIN vendors v ON wo.vendor_id=v.id LEFT JOIN deliveries d ON d.order_id=wo.id WHERE wo.customer_id=? AND wo.status NOT IN('delivered','cancelled') ORDER BY wo.created_at DESC LIMIT 1");
+    $stmt = $db->prepare("SELECT wo.*, v.business_name, d.id as delivery_id, d.scheduled_time, d.actual_delivery_time, d.delivery_notes, d.status as delivery_status FROM water_orders wo JOIN vendors v ON wo.vendor_id=v.id LEFT JOIN deliveries d ON d.order_id=wo.id WHERE wo.customer_id=? AND wo.status NOT IN('delivered','cancelled') ORDER BY wo.created_at DESC LIMIT 1");
     $stmt->execute([$_SESSION['user_id']]);
     $order = $stmt->fetch();
 }
 
 $steps = ['pending'=>1,'accepted'=>2,'dispatched'=>3,'delivered'=>4];
 $currentStep = $order ? ($steps[$order['status']] ?? 0) : 0;
+
+$extraScripts = '';
+if ($order && $order['status'] === 'dispatched' && !empty($order['delivery_id'])) {
+    $extraScripts = '<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>#map { height: 300px; width: 100%; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border); }</style>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var map = L.map("map").setView([-1.286389, 36.817223], 14); // Nairobi default
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+        var truckIcon = L.icon({
+            iconUrl: "https://cdn-icons-png.flaticon.com/512/3256/3256157.png",
+            iconSize: [40, 40], iconAnchor: [20, 20]
+        });
+        var marker = L.marker([-1.286389, 36.817223], {icon: truckIcon}).addTo(map);
+        
+        function fetchLocation() {
+            fetch("/api/get_location.php?delivery_id='.$order['delivery_id'].'")
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.lat && data.lng) {
+                    var newLatLng = new L.LatLng(data.lat, data.lng);
+                    marker.setLatLng(newLatLng);
+                    map.panTo(newLatLng);
+                }
+            }).catch(e => console.error("Error fetching GPS:", e));
+        }
+        setInterval(fetchLocation, 3000);
+        fetchLocation();
+    });
+    </script>';
+}
 ?>
 
 <?php if ($order): ?>
@@ -68,11 +100,17 @@ $currentStep = $order ? ($steps[$order['status']] ?? 0) : 0;
     <div style="margin-top:32px;text-align:center">
         <a href="/customer/feedback.php?order_id=<?php echo $order['id']; ?>" class="btn btn-primary">⭐ Rate This Delivery</a>
     </div>
+    <?php elseif($order['status']==='dispatched' && !empty($order['delivery_id'])): ?>
+    <div class="card" style="margin-top:24px; box-shadow:none">
+        <h4 style="color:var(--text-primary)">📍 Live Tracking</h4>
+        <p style="font-size:0.875rem; color:var(--text-secondary)">Your water is on the way! The driver\'s location updates every few seconds.</p>
+        <div id="map"></div>
+    </div>
     <?php endif; ?>
 </div>
 
 <script>
-<?php if ($order['status'] !== 'delivered' && $order['status'] !== 'cancelled'): ?>
+<?php if ($order['status'] !== 'delivered' && $order['status'] !== 'cancelled' && $order['status'] !== 'dispatched'): ?>
 setTimeout(()=>location.reload(), 30000);
 <?php endif; ?>
 </script>

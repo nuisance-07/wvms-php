@@ -3,7 +3,7 @@ $pageTitle = 'Place Order';
 require_once __DIR__ . '/../includes/header.php';
 requireRole('customer');
 $db = getDB();
-$vendors = getActiveVendors();
+$vendors = getActiveVendorsWithRating();
 $user = getCurrentUserFull();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,15 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <!-- Step 1: Details -->
         <div class="card fade-in" id="step-1">
-            <h3 class="mb-4">Step 1: Order Details</h3>
+            <h3 class="mb-4">Step 1: Order Details (Marketplace)</h3>
             <div class="form-group">
-                <label class="form-label" for="vendor_id">Select Vendor</label>
-                <select name="vendor_id" id="vendor_id" class="form-control" required onchange="updateSummary()">
-                    <option value="">— Choose a vendor —</option>
+                <label class="form-label">Select Vendor</label>
+                <input type="hidden" name="vendor_id" id="vendor_id" required>
+                <div class="grid-2" style="gap:16px; margin-bottom:16px;">
                     <?php foreach($vendors as $v): ?>
-                    <option value="<?php echo $v['id']; ?>" data-name="<?php echo sanitize($v['business_name']); ?>"><?php echo sanitize($v['business_name']); ?> (<?php echo sanitize($v['service_area']); ?>)</option>
+                    <div class="vendor-card" style="border:1px solid var(--border); border-radius:8px; padding:16px; cursor:pointer; transition:all 0.2s;" onclick="selectVendor(this, <?php echo $v['id']; ?>, '<?php echo addslashes(sanitize($v['business_name'])); ?>')">
+                        <div style="font-weight:600; margin-bottom:4px;"><?php echo sanitize($v['business_name']); ?></div>
+                        <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:8px;">📍 <?php echo sanitize($v['service_area']); ?></div>
+                        <div style="display:flex; align-items:center; gap:4px; font-size:0.875rem;">
+                            <span style="color:var(--warning);">★</span>
+                            <span style="font-weight:600;"><?php echo number_format($v['avg_rating'], 1); ?></span>
+                            <span style="color:var(--text-muted);">out of 5 (<?php echo $v['total_reviews']; ?> reviews)</span>
+                        </div>
+                    </div>
                     <?php endforeach; ?>
-                </select>
+                </div>
             </div>
 
             <div class="form-group">
@@ -154,9 +162,22 @@ function prevStep(step) {
     document.getElementById('indicator-2').className = 'stepper-step ' + (step > 2 ? 'completed' : (step==2?'active':''));
     document.getElementById('indicator-3').className = 'stepper-step ' + (step==3?'active':'');
 }
+function selectVendor(element, id, name) {
+    document.querySelectorAll('.vendor-card').forEach(c => c.style.borderColor = 'var(--border)');
+    document.querySelectorAll('.vendor-card').forEach(c => c.style.backgroundColor = 'transparent');
+    element.style.borderColor = 'var(--primary)';
+    element.style.backgroundColor = 'var(--primary-light)';
+    
+    let hiddenInput = document.getElementById('vendor_id');
+    hiddenInput.value = id;
+    hiddenInput.setAttribute('data-name', name);
+    updateSummary();
+}
+
 function updateSummary() {
-    let sel = document.getElementById('vendor_id');
-    let vendorName = sel.options[sel.selectedIndex]?.getAttribute('data-name') || '—';
+    let hiddenInput = document.getElementById('vendor_id');
+    let vendorId = hiddenInput.value;
+    let vendorName = hiddenInput.getAttribute('data-name') || '—';
     document.getElementById('sum-vendor').innerText = vendorName;
     
     let qty = parseFloat(document.getElementById('quantity_litres').value) || 0;

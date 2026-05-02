@@ -202,6 +202,26 @@ function getActiveVendors() {
 }
 
 /**
+ * Get all active vendors with rating for marketplace
+ */
+function getActiveVendorsWithRating() {
+    $db = getDB();
+    $stmt = $db->query("
+        SELECT v.*, u.name, u.phone, 
+               COALESCE(AVG(f.rating), 0) as avg_rating,
+               COUNT(f.id) as total_reviews
+        FROM vendors v 
+        JOIN users u ON v.user_id = u.id 
+        LEFT JOIN water_orders wo ON wo.vendor_id = v.id
+        LEFT JOIN feedback f ON f.order_id = wo.id
+        WHERE v.status = 'active' AND u.status = 'active'
+        GROUP BY v.id
+        ORDER BY avg_rating DESC
+    ");
+    return $stmt->fetchAll();
+}
+
+/**
  * Get average vendor rating
  */
 function getVendorRating($vendorId) {
@@ -292,8 +312,8 @@ function renderPagination($pagination, $baseUrl) {
 // TODO: GPS real-time delivery tracking
 // function getDeliveryLocation($deliveryId) { }
 
-// TODO: SMS notifications via Africa's Talking API
-// function sendSMS($phone, $message) { }
+// SMS notifications via Africa's Talking API
+require_once __DIR__ . '/sms.php';
 
 // TODO: Full M-Pesa Daraja API integration
 // function initiateMpesaPayment($phone, $amount, $orderId) { }

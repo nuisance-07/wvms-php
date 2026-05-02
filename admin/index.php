@@ -41,7 +41,7 @@ $pendingOrders = $db->query("SELECT COUNT(*) FROM water_orders WHERE status='pen
     </div>
 </div>
 
-<div class="flex gap-4 mb-6 fade-in">
+<div class="flex gap-4 mb-6 flex-wrap fade-in">
     <a href="/admin/users.php" class="btn btn-primary">👥 Manage Users</a>
     <a href="/admin/vendors.php" class="btn btn-secondary">🏪 Vendor Performance</a>
     <a href="/admin/orders.php" class="btn btn-secondary">📦 All Orders</a>

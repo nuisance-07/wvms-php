@@ -4,10 +4,10 @@
  * PDO connection with error handling and UTF-8 support
  */
 
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'wvms_db');
-define('DB_USER', 'wvms_user');
-define('DB_PASS', 'wvms_dev_2026');
+define('DB_HOST', 'sql303.infinityfree.com');
+define('DB_NAME', 'if0_41804517_wvms');
+define('DB_USER', 'if0_41804517');
+define('DB_PASS', 'XdJ4ATrKVYXf9');
 define('DB_CHARSET', 'utf8mb4');
 
 // Base URL - adjust for your environment

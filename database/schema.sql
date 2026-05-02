@@ -7,8 +7,7 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+03:00";
 
-CREATE DATABASE IF NOT EXISTS `wvms_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `wvms_db`;
+
 
 -- ============================================================
 -- TABLE: users
@@ -133,74 +132,6 @@ CREATE TABLE IF NOT EXISTS `feedback` (
     UNIQUE KEY `uk_feedback_order` (`order_id`),
     INDEX `idx_feedback_customer` (`customer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ============================================================
--- TRIGGER: Auto-create delivery record when order is placed
--- ============================================================
-DELIMITER //
-
-CREATE TRIGGER `trg_after_order_insert`
-AFTER INSERT ON `water_orders`
-FOR EACH ROW
-BEGIN
-    INSERT INTO `deliveries` (`order_id`, `vendor_id`, `scheduled_time`, `status`)
-    VALUES (NEW.id, NEW.vendor_id, NEW.preferred_delivery_time, 'pending');
-
-    -- Notify the vendor about new order
-    INSERT INTO `notifications` (`user_id`, `message`, `type`)
-    SELECT v.user_id, CONCAT('New order #', NEW.id, ' received for ', NEW.quantity_litres, ' litres.'), 'order'
-    FROM `vendors` v WHERE v.id = NEW.vendor_id;
-
-    -- Notify the customer that order was placed
-    INSERT INTO `notifications` (`user_id`, `message`, `type`)
-    VALUES (NEW.customer_id, CONCAT('Your order #', NEW.id, ' has been placed successfully.'), 'order');
-END //
-
--- ============================================================
--- TRIGGER: Notify on order status change
--- ============================================================
-CREATE TRIGGER `trg_after_order_status_update`
-AFTER UPDATE ON `water_orders`
-FOR EACH ROW
-BEGIN
-    IF OLD.status != NEW.status THEN
-        -- Notify customer about status change
-        INSERT INTO `notifications` (`user_id`, `message`, `type`)
-        VALUES (NEW.customer_id, CONCAT('Order #', NEW.id, ' status updated to: ', UPPER(NEW.status), '.'), 'order');
-
-        -- If delivered, notify vendor too
-        IF NEW.status = 'delivered' THEN
-            INSERT INTO `notifications` (`user_id`, `message`, `type`)
-            SELECT v.user_id, CONCAT('Order #', NEW.id, ' has been marked as delivered.'), 'delivery'
-            FROM `vendors` v WHERE v.id = NEW.vendor_id;
-        END IF;
-
-        -- Update delivery status to match order status
-        IF NEW.status = 'dispatched' THEN
-            UPDATE `deliveries` SET `status` = 'in_transit' WHERE `order_id` = NEW.id;
-        ELSEIF NEW.status = 'delivered' THEN
-            UPDATE `deliveries` SET `status` = 'delivered', `actual_delivery_time` = NOW() WHERE `order_id` = NEW.id;
-        ELSEIF NEW.status = 'cancelled' THEN
-            UPDATE `deliveries` SET `status` = 'failed' WHERE `order_id` = NEW.id;
-        END IF;
-    END IF;
-END //
-
--- ============================================================
--- TRIGGER: Notify on payment confirmation
--- ============================================================
-CREATE TRIGGER `trg_after_payment_confirmed`
-AFTER UPDATE ON `payments`
-FOR EACH ROW
-BEGIN
-    IF OLD.status != NEW.status AND NEW.status = 'confirmed' THEN
-        INSERT INTO `notifications` (`user_id`, `message`, `type`)
-        SELECT wo.customer_id, CONCAT('Payment of KES ', NEW.amount, ' for order #', NEW.order_id, ' has been confirmed.'), 'payment'
-        FROM `water_orders` wo WHERE wo.id = NEW.order_id;
-    END IF;
-END //
-
-DELIMITER ;
 
 -- ============================================================
 -- SEED DATA: Default admin account

@@ -43,23 +43,35 @@ $users = $db->query("SELECT * FROM users $where ORDER BY created_at DESC")->fetc
     <button class="btn btn-success btn-sm" onclick="document.getElementById('addVendorModal').classList.add('show')" style="margin-left:auto">+ Add Vendor</button>
 </div>
 
-<div class="table-container">
-    <div class="table-header"><h3>👥 All Users (<?php echo count($users); ?>)</h3><input type="text" class="table-search" placeholder="Search..." onkeyup="filterTable('userSearch','usersTable')" id="userSearch"></div>
-    <table class="data-table" id="usersTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody>
-    <?php foreach($users as $u): ?>
-    <tr>
-        <td><?php echo $u['id']; ?></td><td><?php echo sanitize($u['name']); ?></td><td><?php echo sanitize($u['email']); ?></td><td><?php echo sanitize($u['phone']); ?></td>
-        <td><span class="status-badge badge-info"><?php echo ucfirst($u['role']); ?></span></td>
-        <td><?php echo getStatusBadge($u['status']); ?></td><td><?php echo formatDate($u['created_at']); ?></td>
-        <td class="actions">
-            <?php if($u['id']!=$_SESSION['user_id']): ?>
-            <form method="POST" style="display:inline"><?php csrfField(); ?><input type="hidden" name="action" value="toggle_status"><input type="hidden" name="user_id" value="<?php echo $u['id']; ?>"><input type="hidden" name="new_status" value="<?php echo $u['status']==='active'?'inactive':'active'; ?>"><button class="btn btn-sm <?php echo $u['status']==='active'?'btn-danger':'btn-success'; ?>"><?php echo $u['status']==='active'?'Deactivate':'Activate'; ?></button></form>
-            <form method="POST" style="display:inline" onsubmit="return confirm('Reset password?')"><?php csrfField(); ?><input type="hidden" name="action" value="reset_password"><input type="hidden" name="user_id" value="<?php echo $u['id']; ?>"><button class="btn btn-sm btn-warning">Reset PW</button></form>
-            <?php endif; ?>
-        </td>
-    </tr>
-    <?php endforeach; ?>
-    </tbody></table>
+<div class="table-wrapper fade-in">
+    <div class="table-header-row">
+        <div class="table-title">👥 Manage Users</div>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Joined</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+        <?php foreach($users as $u): ?>
+        <tr>
+            <td><strong><?php echo sanitize($u['name']); ?></strong></td>
+            <td><?php echo sanitize($u['email']); ?></td>
+            <td><?php echo sanitize($u['phone']); ?></td>
+            <td><span class="badge <?php echo $u['role']==='admin'?'badge-error':($u['role']==='vendor'?'badge-warning':'badge-info'); ?>"><?php echo strtoupper($u['role']); ?></span></td>
+            <td>
+                <?php if($u['status']==='active'): ?><span class="badge badge-success">Active</span>
+                <?php else: ?><span class="badge badge-error">Inactive</span><?php endif; ?>
+            </td>
+            <td><?php echo formatDate($u['created_at']); ?></td>
+            <td>
+                <?php if($u['id'] !== $_SESSION['user_id']): ?>
+                <form method="POST" style="display:inline"><?php csrfField(); ?><input type="hidden" name="user_id" value="<?php echo $u['id']; ?>"><input type="hidden" name="action" value="<?php echo $u['status']==='active'?'deactivate':'activate'; ?>"><button class="btn btn-sm <?php echo $u['status']==='active'?'btn-danger':'btn-success'; ?>"><?php echo $u['status']==='active'?'Deactivate':'Activate'; ?></button></form>
+                <?php endif; ?>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
 
 <!-- Add Vendor Modal -->

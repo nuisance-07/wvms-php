@@ -7,8 +7,9 @@ $currentUser = getCurrentUser();
 ?>
 
 <?php if ($currentUser): ?>
-    </div><!-- /.content-area -->
-</div><!-- /.main-wrapper -->
+        </div><!-- /.page-container -->
+    </main><!-- /.main-content -->
+</div><!-- /.dashboard-wrapper -->
 <?php else: ?>
 </div><!-- /.public-wrapper -->
 <?php endif; ?>

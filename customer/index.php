@@ -14,28 +14,58 @@ $deliveredCount = $db->prepare("SELECT COUNT(*) FROM water_orders WHERE customer
 ?>
 
 <div class="stats-grid">
-    <div class="stat-card"><div class="stat-icon">📦</div><div class="stat-info"><h3><?php echo $totalOrders->fetchColumn(); ?></h3><p>Total Orders</p></div></div>
-    <div class="stat-card green"><div class="stat-icon">✅</div><div class="stat-info"><h3><?php echo $deliveredCount->fetchColumn(); ?></h3><p>Delivered</p></div></div>
-    <div class="stat-card orange"><div class="stat-icon">💰</div><div class="stat-info"><h3><?php echo formatCurrency($totalSpent->fetchColumn()); ?></h3><p>Total Spent</p></div></div>
-    <div class="stat-card"><div class="stat-icon">🔔</div><div class="stat-info"><h3><?php echo $unreadCount; ?></h3><p>Unread Alerts</p></div></div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon-wrap stat-icon-primary">📦</div>
+            <div class="stat-trend trend-up">↑ Total</div>
+        </div>
+        <div class="stat-value"><?php echo $totalOrders->fetchColumn(); ?></div>
+        <div class="stat-label">Total Orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon-wrap stat-icon-success">✅</div>
+            <div class="stat-trend trend-up">↑ Lifetime</div>
+        </div>
+        <div class="stat-value"><?php echo $deliveredCount->fetchColumn(); ?></div>
+        <div class="stat-label">Delivered Orders</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon-wrap stat-icon-warning">💰</div>
+        </div>
+        <div class="stat-value"><?php echo formatCurrency($totalSpent->fetchColumn()); ?></div>
+        <div class="stat-label">Total Spent</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-header">
+            <div class="stat-icon-wrap stat-icon-primary">🔔</div>
+        </div>
+        <div class="stat-value"><?php echo $unreadCount; ?></div>
+        <div class="stat-label">Unread Alerts</div>
+    </div>
 </div>
 
 <?php if ($active): ?>
-<div class="card">
-    <div class="card-header"><h3>🚚 Active Order</h3><?php echo getStatusBadge($active['status']); ?></div>
-    <div class="order-card-body">
-        <div><span class="label">Order #</span><strong><?php echo $active['id']; ?></strong></div>
-        <div><span class="label">Vendor</span><strong><?php echo sanitize($active['business_name']); ?></strong></div>
-        <div><span class="label">Quantity</span><strong><?php echo $active['quantity_litres']; ?>L</strong></div>
-        <div><span class="label">Total</span><strong><?php echo formatCurrency($active['total_amount']); ?></strong></div>
+<div class="card fade-in">
+    <div class="flex justify-between items-center mb-4">
+        <h3>🚚 Active Order</h3>
+        <?php echo getStatusBadge($active['status']); ?>
     </div>
-    <div style="margin-top:16px"><a href="/customer/track_order.php?id=<?php echo $active['id']; ?>" class="btn btn-primary btn-sm">Track Order →</a></div>
+    <div class="grid-2 mb-6">
+        <div><span class="label">Order #</span><br><strong><?php echo $active['id']; ?></strong></div>
+        <div><span class="label">Vendor</span><br><strong><?php echo sanitize($active['business_name']); ?></strong></div>
+        <div><span class="label">Quantity</span><br><strong><?php echo $active['quantity_litres']; ?>L</strong></div>
+        <div><span class="label">Total Amount</span><br><strong><?php echo formatCurrency($active['total_amount']); ?></strong></div>
+    </div>
+    <a href="/customer/track_order.php?id=<?php echo $active['id']; ?>" class="btn btn-primary">Track Order →</a>
 </div>
 <?php else: ?>
-<div class="card" style="text-align:center;padding:40px">
-    <div style="font-size:3rem;margin-bottom:12px">💧</div>
-    <h3>No Active Orders</h3><p style="color:var(--text-light);margin:8px 0 20px">Ready to order fresh water?</p>
-    <a href="/customer/place_order.php" class="btn btn-primary btn-lg">Place New Order</a>
+<div class="card text-center fade-in" style="padding:48px 24px">
+    <div style="font-size:3rem;margin-bottom:16px">💧</div>
+    <h3 class="mb-4">No Active Orders</h3>
+    <p style="color:var(--text-secondary);margin-bottom:24px">Your water supply looks stable. Ready to order fresh water?</p>
+    <a href="/customer/place_order.php" class="btn btn-primary">Place New Order</a>
 </div>
 <?php endif; ?>
 
@@ -43,13 +73,28 @@ $deliveredCount = $db->prepare("SELECT COUNT(*) FROM water_orders WHERE customer
 $recent = $db->prepare("SELECT wo.*, v.business_name FROM water_orders wo JOIN vendors v ON wo.vendor_id=v.id WHERE wo.customer_id=? ORDER BY wo.created_at DESC LIMIT 5");
 $recent->execute([$uid]); $recentOrders = $recent->fetchAll();
 if ($recentOrders): ?>
-<div class="table-container">
-    <div class="table-header"><h3>Recent Orders</h3><a href="/customer/orders.php" class="btn btn-outline btn-sm">View All</a></div>
-    <table class="data-table"><thead><tr><th>Order #</th><th>Vendor</th><th>Qty</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>
-    <?php foreach($recentOrders as $o): ?>
-    <tr><td><strong>#<?php echo $o['id']; ?></strong></td><td><?php echo sanitize($o['business_name']); ?></td><td><?php echo $o['quantity_litres']; ?>L</td><td><?php echo formatCurrency($o['total_amount']); ?></td><td><?php echo getStatusBadge($o['status']); ?></td><td><?php echo formatDate($o['created_at']); ?></td></tr>
-    <?php endforeach; ?>
-    </tbody></table>
+<div class="table-wrapper fade-in">
+    <div class="table-header-row">
+        <div class="table-title">Recent Orders</div>
+        <a href="/customer/orders.php" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr><th>Order #</th><th>Vendor</th><th>Qty</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+        </thead>
+        <tbody>
+        <?php foreach($recentOrders as $o): ?>
+            <tr>
+                <td><strong>#<?php echo $o['id']; ?></strong></td>
+                <td><?php echo sanitize($o['business_name']); ?></td>
+                <td><?php echo $o['quantity_litres']; ?>L</td>
+                <td><?php echo formatCurrency($o['total_amount']); ?></td>
+                <td><?php echo getStatusBadge($o['status']); ?></td>
+                <td><?php echo formatDate($o['created_at']); ?></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>
 <?php endif; ?>
 

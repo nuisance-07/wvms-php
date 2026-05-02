@@ -23,24 +23,31 @@ $stmt->execute($params); $orders = $stmt->fetchAll();
     <?php endforeach; ?>
 </div>
 
-<div class="table-container">
-    <div class="table-header"><h3>Order History</h3><input type="text" class="table-search" placeholder="Search orders..." onkeyup="filterTable('this','ordersTable')" id="orderSearch"></div>
-    <table class="data-table" id="ordersTable"><thead><tr><th>#</th><th>Vendor</th><th>Qty</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead><tbody>
-    <?php if(empty($orders)): ?>
-    <tr><td colspan="7" class="no-data">No orders found.</td></tr>
-    <?php else: foreach($orders as $o): ?>
-    <tr>
-        <td><strong>#<?php echo $o['id']; ?></strong></td>
-        <td><?php echo sanitize($o['business_name']); ?></td>
-        <td><?php echo $o['quantity_litres']; ?>L</td>
-        <td><?php echo formatCurrency($o['total_amount']); ?></td>
-        <td><?php echo getStatusBadge($o['status']); ?></td>
-        <td><?php echo formatDate($o['created_at']); ?></td>
-        <td><a href="/customer/track_order.php?id=<?php echo $o['id']; ?>" class="btn btn-sm btn-outline">Track</a></td>
-    </tr>
-    <?php endforeach; endif; ?>
-    </tbody></table>
-    <?php echo renderPagination($page, '/customer/orders.php'); ?>
+<div class="table-wrapper fade-in">
+    <div class="table-header-row">
+        <div class="table-title">My Order History</div>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr><th>Order #</th><th>Vendor</th><th>Quantity</th><th>Total Amount</th><th>Status</th><th>Date Ordered</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+        <?php if(empty($orders)): ?>
+            <tr><td colspan="7" class="no-data">You haven't placed any orders yet.</td></tr>
+        <?php else: foreach($orders as $o): ?>
+            <tr>
+                <td><strong>#<?php echo $o['id']; ?></strong></td>
+                <td><?php echo sanitize($o['business_name']); ?></td>
+                <td><?php echo $o['quantity_litres']; ?>L</td>
+                <td><?php echo formatCurrency($o['total_amount']); ?></td>
+                <td><?php echo getStatusBadge($o['status']); ?></td>
+                <td><?php echo formatDate($o['created_at']); ?></td>
+                <td><a href="/customer/track_order.php?id=<?php echo $o['id']; ?>" class="btn btn-secondary btn-sm">Track</a></td>
+            </tr>
+        <?php endforeach; endif; ?>
+        </tbody>
+    </table>
 </div>
+<?php echo renderPagination($page, '/customer/orders.php'); ?>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>

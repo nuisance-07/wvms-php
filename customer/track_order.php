@@ -20,40 +20,52 @@ $currentStep = $order ? ($steps[$order['status']] ?? 0) : 0;
 ?>
 
 <?php if ($order): ?>
-<div class="card">
-    <div class="card-header"><h3>Order #<?php echo $order['id']; ?></h3><?php echo getStatusBadge($order['status']); ?></div>
-
-    <div class="stepper">
-        <?php $stepLabels = ['Pending','Accepted','Dispatched','Delivered'];
-        $stepIcons = ['📝','✅','🚚','🏠'];
-        foreach($stepLabels as $i => $label):
-            $stepNum = $i + 1;
-            $class = $currentStep > $stepNum ? 'completed' : ($currentStep == $stepNum ? 'active' : '');
-        ?>
-        <div class="stepper-step <?php echo $class; ?>">
-            <div class="stepper-circle"><?php echo $currentStep > $stepNum ? '✓' : $stepIcons[$i]; ?></div>
-            <span class="stepper-label"><?php echo $label; ?></span>
-        </div>
-        <?php endforeach; ?>
+<div class="card fade-in">
+    <div class="flex justify-between items-center mb-6">
+        <h3>Order #<?php echo $order['id']; ?></h3>
+        <?php echo getStatusBadge($order['status']); ?>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px">
-        <div class="card" style="margin:0"><h4 style="margin-bottom:12px;color:var(--primary)">Order Details</h4>
-            <p><strong>Vendor:</strong> <?php echo sanitize($order['business_name']); ?></p>
-            <p><strong>Quantity:</strong> <?php echo $order['quantity_litres']; ?> Litres</p>
-            <p><strong>Total:</strong> <?php echo formatCurrency($order['total_amount']); ?></p>
-            <p><strong>Address:</strong> <?php echo sanitize($order['delivery_address']); ?></p>
+    <div class="stepper-container">
+        <div class="stepper">
+            <?php $stepLabels = ['Pending','Accepted','Dispatched','Delivered'];
+            foreach($stepLabels as $i => $label):
+                $stepNum = $i + 1;
+                $class = $currentStep > $stepNum ? 'completed' : ($currentStep == $stepNum ? 'active' : '');
+            ?>
+            <div class="stepper-step <?php echo $class; ?>">
+                <div class="step-circle"><?php echo $currentStep > $stepNum ? '✓' : $stepNum; ?></div>
+                <div class="step-label"><?php echo $label; ?></div>
+            </div>
+            <?php endforeach; ?>
         </div>
-        <div class="card" style="margin:0"><h4 style="margin-bottom:12px;color:var(--primary)">Delivery Info</h4>
-            <p><strong>Ordered:</strong> <?php echo formatDateTime($order['created_at']); ?></p>
-            <p><strong>Scheduled:</strong> <?php echo $order['scheduled_time'] ? formatDateTime($order['scheduled_time']) : 'TBD'; ?></p>
-            <p><strong>Delivered:</strong> <?php echo $order['actual_delivery_time'] ? formatDateTime($order['actual_delivery_time']) : '—'; ?></p>
-            <?php if($order['delivery_notes']): ?><p><strong>Notes:</strong> <?php echo sanitize($order['delivery_notes']); ?></p><?php endif; ?>
+    </div>
+
+    <div class="grid-2" style="margin-top:24px">
+        <div class="card" style="box-shadow:none; margin-bottom:0">
+            <h4 class="mb-4" style="color:var(--text-primary)">Order Details</h4>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:0.875rem">
+                <div><span class="label">Vendor</span><br><strong><?php echo sanitize($order['business_name']); ?></strong></div>
+                <div><span class="label">Quantity</span><br><strong><?php echo $order['quantity_litres']; ?> Litres</strong></div>
+                <div><span class="label">Total Amount</span><br><strong><?php echo formatCurrency($order['total_amount']); ?></strong></div>
+                <div><span class="label">Delivery Address</span><br><strong><?php echo sanitize($order['delivery_address']); ?></strong></div>
+            </div>
+        </div>
+        <div class="card" style="box-shadow:none; margin-bottom:0">
+            <h4 class="mb-4" style="color:var(--text-primary)">Delivery Info</h4>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:0.875rem">
+                <div><span class="label">Ordered At</span><br><strong><?php echo formatDateTime($order['created_at']); ?></strong></div>
+                <div><span class="label">Scheduled Time</span><br><strong><?php echo $order['scheduled_time'] ? formatDateTime($order['scheduled_time']) : 'To be determined'; ?></strong></div>
+                <div><span class="label">Delivered At</span><br><strong><?php echo $order['actual_delivery_time'] ? formatDateTime($order['actual_delivery_time']) : '—'; ?></strong></div>
+                <?php if($order['delivery_notes']): ?>
+                <div><span class="label">Notes</span><br><strong><?php echo sanitize($order['delivery_notes']); ?></strong></div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
     <?php if($order['status']==='delivered'): ?>
-    <div style="margin-top:20px;text-align:center">
+    <div style="margin-top:32px;text-align:center">
         <a href="/customer/feedback.php?order_id=<?php echo $order['id']; ?>" class="btn btn-primary">⭐ Rate This Delivery</a>
     </div>
     <?php endif; ?>

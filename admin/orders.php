@@ -15,12 +15,12 @@ $stmt=$db->prepare("SELECT wo.*,u.name as customer_name,v.business_name FROM wat
 $stmt->execute($params); $orders=$stmt->fetchAll();
 $vendors=$db->query("SELECT v.id,v.business_name FROM vendors v")->fetchAll();
 ?>
-<div class="flex gap-2 mb-6 flex-wrap fade-in">
+<div class="filters fade-in">
     <a href="/admin/orders.php" class="btn <?php echo !$status?'btn-primary':'btn-secondary'; ?> btn-sm">All</a>
     <?php foreach(['pending','accepted','dispatched','delivered','cancelled'] as $s): ?>
     <a href="?status=<?php echo $s; ?>" class="btn <?php echo $status===$s?'btn-primary':'btn-secondary'; ?> btn-sm"><?php echo ucfirst($s); ?></a>
     <?php endforeach; ?>
-    <select onchange="location='?vendor_id='+this.value" class="form-control" style="width:auto;padding:6px 12px;margin-left:auto">
+    <select onchange="location='?vendor_id='+this.value" class="form-control" style="width:auto;min-width:120px;padding:6px 12px;flex:0 1 auto">
         <option value="">All Vendors</option>
         <?php foreach($vendors as $vn): ?><option value="<?php echo $vn['id']; ?>" <?php echo $vid==$vn['id']?'selected':''; ?>><?php echo sanitize($vn['business_name']); ?></option><?php endforeach; ?>
     </select>

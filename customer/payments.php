@@ -39,9 +39,9 @@ $stmt->execute([$_SESSION['user_id']]); $payments = $stmt->fetchAll();
             
             <?php if ($p['status'] === 'pending' && empty($p['mpesa_code'])): ?>
                 <td colspan="2">
-                    <div style="display:flex;gap:8px;align-items:center;background:var(--surface-3);padding:8px;border-radius:8px;border:1px solid var(--border)" id="pay-box-<?php echo $p['id']; ?>">
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--surface-3);padding:8px;border-radius:8px;border:1px solid var(--border)" id="pay-box-<?php echo $p['id']; ?>">
                         <span style="font-size:1.2rem">📱</span>
-                        <input type="text" id="phone-<?php echo $p['id']; ?>" placeholder="Phone (e.g. 0712345678)" class="form-control" style="width:160px;padding:8px;font-size:0.875rem" value="<?php echo sanitize(getCurrentUserFull()['phone']); ?>" required>
+                        <input type="text" id="phone-<?php echo $p['id']; ?>" placeholder="Phone (e.g. 0712345678)" class="form-control" style="flex:1;min-width:140px;padding:8px;font-size:0.875rem" value="<?php echo sanitize(getCurrentUserFull()['phone']); ?>" required>
                         <button class="btn btn-success btn-sm" onclick="triggerSTKPush(<?php echo $p['id']; ?>)">Pay via M-Pesa</button>
                     </div>
                 </td>

@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST') {
     redirect('/customer/profile.php');
 }
 ?>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+<div class="grid-2">
 <div class="card"><div class="card-header"><h3>👤 Profile Info</h3></div>
 <form method="POST"><?php csrfField(); ?><input type="hidden" name="action" value="update">
 <div class="form-group"><label>Name</label><input type="text" name="name" class="form-control" value="<?php echo sanitize($user['name']); ?>" required></div>

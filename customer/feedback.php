@@ -57,8 +57,8 @@ $past->execute([$_SESSION['user_id']]); $pastFeedback = $past->fetchAll();
 </div>
 <?php endif; ?>
 
-<div class="table-container">
-    <div class="table-header"><h3>Past Feedback</h3></div>
+<div class="table-wrapper">
+    <div class="table-header-row"><div class="table-title">Past Feedback</div></div>
     <table class="data-table"><thead><tr><th>Order</th><th>Vendor</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead><tbody>
     <?php if(empty($pastFeedback)): ?><tr><td colspan="5" class="no-data">No feedback given yet.</td></tr>
     <?php else: foreach($pastFeedback as $f): ?>
